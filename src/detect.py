@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Tue Apr 10 12:04:28 2018
 @author: Negar
@@ -13,13 +12,13 @@ def crop_row_detect(image,plot):
     hsv_mask=hsv_thresholding(image)
     warp_prespective=remove_prespective(hsv_mask)
     skel=skeletonize(warp_prespective)
-    opening=cv2.morphologyEx(skel, cv2.MORPH_OPEN, (3,3))
-    X,Y,labels=cluster(opening)
+    X,Y,labels=cluster(skel)
     lines=find_lines(X,Y,labels,plot)
     inversed= inverse_prespective(lines)
     return inversed,lines
 
 def hsv_thresholding(image):
+    '''Inputs a RGB image and outputs a binery image of the green areas in HSV'''
 
     min_values = np.array([37, 0, 0],np.uint8)
     max_values = np.array([150, 255, 255],np.uint8)
@@ -30,7 +29,7 @@ def hsv_thresholding(image):
     return mask
 
 def skeletonize(image):
-    '''Inputs and grayscale image and outputs a binary skeleton image'''
+    '''Inputs a binerized image and outputs the skeleton of the image'''
     size = np.size(image)
     skel = np.zeros(image.shape, np.uint8)
     element = cv2.getStructuringElement(cv2.MORPH_CROSS, (3,3))
@@ -50,6 +49,7 @@ def skeletonize(image):
 
 
 def remove_prespective(image):
+    '''removes prespective dirtortion'''
     pts_src = np.array([[85, 68],[225, 68], [0, 239], [319, 239]], dtype = "float32")
     pts_dst = np.array([[0, 0],[140, 0],[0, 171],[140, 171]], dtype = "float32")
     h= cv2.getPerspectiveTransform(pts_src, pts_dst)
@@ -57,6 +57,7 @@ def remove_prespective(image):
     return im_out
 
 def inverse_prespective(lines):
+    '''transforms to prespective view'''
     overlay = np.zeros(shape=(240,320,3))
     for l in lines:
         cv2.line(overlay,l[0],l[1],(0,0,255),1)
@@ -70,11 +71,13 @@ def inverse_prespective(lines):
 
 
 def cluster(image):
+    '''Inputs bird's eye view skeleton and outputs clusters of the skeleton'''
+
     X,Y=np.nonzero(image)
 
     try :
         bandwidth = clstr.estimate_bandwidth(Y.reshape(-1, 1), quantile=0.15)
-        ms = clstr.MeanShift(bandwidth=bandwidth,bin_seeding=True, min_bin_freq=15)
+        ms = clstr.MeanShift(bandwidth=bandwidth, bin_seeding=True, min_bin_freq=15)
         kmeansoutput=ms.fit(Y.reshape(-1, 1))
     except :
         ms = clstr.MeanShift()
@@ -84,25 +87,27 @@ def cluster(image):
     return X,Y,labels
 
 def find_lines(X,Y,labels,plot=False):
+    '''Inputs a clusters and outputs lines fittet to the clusters'''
+
     lines =[]
     coefficients=[]
     if plot:
         plotHandles = []
         pl.figure('Meanshift')
-        pl.scatter(X, Y, c=labels)
+        pl.scatter(Y,X, c=labels)
     for i in range(len(np.unique(labels))):
         cluster_indices= np.where(labels == i)[0]
         cluster_xs=X[cluster_indices]
         cluster_ys=Y[cluster_indices]
         
         try:
-            if cluster_xs[-1]-cluster_xs[0]>70 :
+            if cluster_xs[-1]-cluster_xs[0]>60 and len(cluster_xs)>20 :
                 coeff=np.polyfit(cluster_xs,cluster_ys,1)
                 coefficients.append(coeff)
                 f = np.poly1d(coeff)
                 lines.append(((int(f(0)),0),(int(f(319)),319)))
                 if plot:
-                    p, = pl.plot(cluster_xs, f(cluster_ys), '-')
+                    p, = pl.plot(f(cluster_ys),cluster_xs, '-')
                     plotHandles.append(p)
                     
         except:

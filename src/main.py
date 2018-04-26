@@ -18,7 +18,7 @@ image_out_path = os.path.abspath('../Out/')
 
 curr_image=0
 timming=False
-plot=False
+plot=True
 diff=[]
 
 def main():        
