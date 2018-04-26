@@ -77,7 +77,7 @@ def cluster(image):
 
     try :
         bandwidth = clstr.estimate_bandwidth(Y.reshape(-1, 1), quantile=0.15)
-        ms = clstr.MeanShift(bandwidth=bandwidth, bin_seeding=True, min_bin_freq=15)
+        ms = clstr.MeanShift(bandwidth=bandwidth, bin_seeding=True, min_bin_freq=15,cluster_all=False)
         kmeansoutput=ms.fit(Y.reshape(-1, 1))
     except :
         ms = clstr.MeanShift()
@@ -101,7 +101,7 @@ def find_lines(X,Y,labels,plot=False):
         cluster_ys=Y[cluster_indices]
         
         try:
-            if cluster_xs[-1]-cluster_xs[0]>60 and len(cluster_xs)>20 :
+            if cluster_xs[-1]-cluster_xs[0]>70 :
                 coeff=np.polyfit(cluster_xs,cluster_ys,1)
                 coefficients.append(coeff)
                 f = np.poly1d(coeff)
