@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Apr 10 12:04:28 2018
-
 @author: Negar
 """
 import cv2
@@ -10,13 +9,13 @@ from scipy.optimize import curve_fit
 import pylab as pl
 import sklearn.cluster as clstr
 
-def crop_row_detect(image):
+def crop_row_detect(image,plot):
     hsv_mask=hsv_thresholding(image)
     warp_prespective=remove_prespective(hsv_mask)
     skel=skeletonize(warp_prespective)
     opening=cv2.morphologyEx(skel, cv2.MORPH_OPEN, (3,3))
     X,Y,labels=cluster(opening)
-    lines=find_lines(X,Y,labels,True)
+    lines=find_lines(X,Y,labels,plot)
     inversed= inverse_prespective(lines)
     return inversed,lines
 
@@ -54,7 +53,7 @@ def remove_prespective(image):
     pts_src = np.array([[85, 68],[225, 68], [0, 239], [319, 239]], dtype = "float32")
     pts_dst = np.array([[0, 0],[140, 0],[0, 171],[140, 171]], dtype = "float32")
     h= cv2.getPerspectiveTransform(pts_src, pts_dst)
-    im_out = cv2.warpPerspective(image, h, (150,105))
+    im_out = cv2.warpPerspective(image, h, (140,171))
     return im_out
 
 def inverse_prespective(lines):
@@ -75,7 +74,7 @@ def cluster(image):
 
     try :
         bandwidth = clstr.estimate_bandwidth(Y.reshape(-1, 1), quantile=0.15)
-        ms = clstr.MeanShift(bandwidth=bandwidth, bin_seeding=True, min_bin_freq=15)
+        ms = clstr.MeanShift(bandwidth=bandwidth,bin_seeding=True, min_bin_freq=15)
         kmeansoutput=ms.fit(Y.reshape(-1, 1))
     except :
         ms = clstr.MeanShift()
@@ -97,7 +96,7 @@ def find_lines(X,Y,labels,plot=False):
         cluster_ys=Y[cluster_indices]
         
         try:
-            if cluster_xs[-1]-cluster_xs[0]>60 and len(cluster_xs)>20 :
+            if cluster_xs[-1]-cluster_xs[0]>70 :
                 coeff=np.polyfit(cluster_xs,cluster_ys,1)
                 coefficients.append(coeff)
                 f = np.poly1d(coeff)
@@ -113,4 +112,3 @@ def find_lines(X,Y,labels,plot=False):
         pl.show()        
         
     return lines
-
