@@ -8,7 +8,7 @@ from scipy.optimize import curve_fit
 import pylab as pl
 import sklearn.cluster as clstr
 
-def crop_row_detect(image,plot):
+def crop_row_detect(image,plot=True):
     hsv_mask=hsv_thresholding(image)
     warp_prespective=remove_prespective(hsv_mask)
     skel=skeletonize(warp_prespective)
