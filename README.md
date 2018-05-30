@@ -9,6 +9,7 @@ this approach has simple steps :
   6.  Cluster by Mean-shift
   7.  Fit lines
   8.  Transform into perspective view
+  
 this approach produces extera lines sometimes and can not detect curved lines. However, the following ideas can address these issues:
   - Filtering lines: 
      -  detecting the distance between each line and remove lines that are not located in that distance
