@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Apr 10 11:59:22 2018
-
-@author: Negar
-"""
-
 
 import cv2,os,time
 import numpy as np
@@ -27,12 +21,14 @@ def main():
         start=time.time()
         image_path = os.path.join(image_data_path, image_name)
         image_in = cv2.imread(image_path)
-        crop_lines,lines = crop_row_detect(image_in)
+	ROI_shape=(140,171)
+	offset=(85,68)
+        crop_lines,lines = crop_row_detect(image_in,ROI_shape,offset)
         if not timming:
             out_path=os.path.join((image_out_path)+image_name[:-4]+".PNG")
             
             #showing region of interest
-            roi=[((85, 68),(225, 68)), ((225, 68),(319, 239)), ((0, 239),(319, 239)),((85, 68),(0, 239))] 
+            roi=[((offset[0], offset[1]),(offset[0]+ROI_shape[0], offset[1])), ((offset[0]+ROI_shape[0], offset[1]),(image_in.shape[0]-1, offset[1]+ROI_shape[1])), ((0, 239),(image_in.shape[0]-1, offset[1]+ROI_shape[1])),((offset[0], offset[1]),(0, offset[1]+ROI_shape[1]))] 
             for l in roi:
                 cv2.line(image_in,l[0],l[1],(0,255,0)) 
             
