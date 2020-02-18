@@ -49,23 +49,55 @@ def skeletonize(image):
 
 
 def remove_prespective(image):
-    '''removes prespective dirtortion'''
-    pts_src = np.array([[85, 68],[225, 68], [0, 239], [319, 239]], dtype = "float32")
-    pts_dst = np.array([[0, 0],[140, 0],[0, 171],[140, 171]], dtype = "float32")
+    '''removes prespective distortion'''
+    # selecting the size of the Region of Intrest (ROI)
+    ROI=(140,171) 
+    
+    #setting the offset where region of intrest should be extracted
+    #i.e. the ROI is selected in a margin from top and both sides 
+    #but not from the bottom as sides and top doesnt provide much information
+    offset=(85,68)
+    
+    #setting the area where the transformation should be applied
+    src_cordinates=[[offset[0], offset[1]],[offset[0]+ROI[0], offset[1]], [0, offset[1]+ROI[1]], [image.shape[0]-1, offset[1]+ROI[1]]]
+    pts_src = np.array(src_cordinates, dtype = "float32")
+    
+    #setting the cordinates for the transformed image
+    dst_cordinates=[[0, 0],[ROI[0], 0],[0, ROI[1]],[ROI[0], ROI[1]]]
+    pts_dst = np.array(dst_cordinates, dtype = "float32")
+    
+    #transforming to bird's eye view
     h= cv2.getPerspectiveTransform(pts_src, pts_dst)
-    im_out = cv2.warpPerspective(image, h, (140,171))
+    im_out = cv2.warpPerspective(image, h, ROI_dimension)
     return im_out
 
+
 def inverse_prespective(lines):
-    '''transforms to prespective view'''
+    '''transforms to prespective view for drawing detected lines on the original image'''
+        
+    #drawing lines on the transformed image
     overlay = np.zeros(shape=(240,320,3))
     for l in lines:
         cv2.line(overlay,l[0],l[1],(0,0,255),1)
-        
-    pts_src = np.array([[85, 68],[225, 68], [0, 239], [319, 239]], dtype = "float32")
-    pts_dst = np.array([[0, 0],[140, 0],[0, 171],[140, 171]], dtype = "float32")
+    
+    # selecting the size of the Region of Intrest (ROI)
+    ROI=(140,171) 
+    
+    #setting the offset where region of intrest was extracted
+    offset=(85,68)
+    
+    #setting the area where the transformation was applied
+    src_cordinates=[[offset[0], offset[1]],[offset[0]+ROI[0], offset[1]], [0, offset[1]+ROI[1]], [image.shape[0]-1, offset[1]+ROI[1]]]
+    pts_src = np.array(src_cordinates, dtype = "float32")
+    
+    #setting the cordinates for the transformed image
+    dst_cordinates=[[0, 0],[ROI[0], 0],[0, ROI[1]],[ROI[0], ROI[1]]]
+    pts_dst = np.array(dst_cordinates, dtype = "float32")
+    
+    #inversing the transformation for the detected line
     h= cv2.getPerspectiveTransform(pts_dst, pts_src)
     im_out = cv2.warpPerspective(overlay, h, (320,240))
+    
     return im_out.astype(np.uint8)
 
 
