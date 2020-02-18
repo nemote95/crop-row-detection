@@ -18,5 +18,5 @@ However, this approach produces extera lines for some imagaes and can not detect
   - Curved rows: 
     - Polynomial line fitting 
     - finding successive short straight lines and representing curves as a set of short lines. 
-  - Noise removing:
+  - Reducing noises:
     - Weeds segmentation/detections based on texture features of the green areas 
