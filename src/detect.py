@@ -1,21 +1,8 @@
-"""
-Created on Tue Apr 10 12:04:28 2018
-@author: Negar
-"""
 import cv2
 import numpy as np 
 from scipy.optimize import curve_fit
 import pylab as pl
 import sklearn.cluster as clstr
-
-def crop_row_detect(image,plot=True):
-    hsv_mask=hsv_thresholding(image)
-    warp_prespective=remove_prespective(hsv_mask)
-    skel=skeletonize(warp_prespective)
-    X,Y,labels=cluster(skel)
-    lines=find_lines(X,Y,labels,plot)
-    inversed= inverse_prespective(lines)
-    return inversed,lines
 
 def hsv_thresholding(image):
     '''Inputs a RGB image and outputs a binery image of the green areas in HSV'''
@@ -49,11 +36,11 @@ def skeletonize(image):
 
 
 def remove_prespective(image,ROI, offset):
-    """"
+    '''
     removes prespective distortion
     ROI : size of the Region of Intrest (ROI). e.g.  (140,171)
     offset :  where region of intrest should be extracted . e.g.(68,85)
-    """"
+    '''
     
     #setting the area where the transformation should be applied
     src_cordinates=[[offset[0], offset[1]],[offset[0]+ROI[0], offset[1]], [0, offset[1]+ROI[1]], [image.shape[0]-1, offset[1]+ROI[1]]]
@@ -70,11 +57,11 @@ def remove_prespective(image,ROI, offset):
 
 
 def inverse_prespective(lines,ROI, offset):
-    """"
+    '''
     applies inverse prespective distortion on lines that are detected
     ROI : size of the Region of Intrest (ROI). e.g.  (140,171)
     offset :  where region of intrest should be extracted . e.g.(68,85)
-    """"
+    '''
     
     #setting the area where the transformation was applied
     src_cordinates=[[offset[0], offset[1]],[offset[0]+ROI[0], offset[1]], [0, offset[1]+ROI[1]], [image.shape[0]-1, offset[1]+ROI[1]]]
@@ -139,3 +126,12 @@ def find_lines(X,Y,labels,plot=False):
         pl.show()        
         
     return lines
+
+def crop_row_detect(image,ROI,offset,plot=True):
+    hsv_mask=hsv_thresholding(image)
+    warp_prespective=remove_prespective(hsv_mask,ROI,offset)
+    skel=skeletonize(warp_prespective)
+    X,Y,labels=cluster(skel)
+    lines=find_lines(X,Y,labels,plot)
+    inversed= inverse_prespective(lines,ROI,offset)
+    return inversed,lines
