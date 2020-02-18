@@ -48,15 +48,12 @@ def skeletonize(image):
     return skel
 
 
-def remove_prespective(image):
-    '''removes prespective distortion'''
-    # selecting the size of the Region of Intrest (ROI)
-    ROI=(140,171) 
-    
-    #setting the offset where region of intrest should be extracted
-    #i.e. the ROI is selected in a margin from top and both sides 
-    #but not from the bottom as sides and top doesnt provide much information
-    offset=(85,68)
+def remove_prespective(image,ROI, offset):
+    """"
+    removes prespective distortion
+    ROI : size of the Region of Intrest (ROI). e.g.  (140,171)
+    offset :  where region of intrest should be extracted . e.g.(68,85)
+    """"
     
     #setting the area where the transformation should be applied
     src_cordinates=[[offset[0], offset[1]],[offset[0]+ROI[0], offset[1]], [0, offset[1]+ROI[1]], [image.shape[0]-1, offset[1]+ROI[1]]]
@@ -68,23 +65,16 @@ def remove_prespective(image):
     
     #transforming to bird's eye view
     h= cv2.getPerspectiveTransform(pts_src, pts_dst)
-    im_out = cv2.warpPerspective(image, h, ROI_dimension)
+    im_out = cv2.warpPerspective(image, h, ROI)
     return im_out
 
 
-def inverse_prespective(lines):
-    '''transforms to prespective view for drawing detected lines on the original image'''
-        
-    #drawing lines on the transformed image
-    overlay = np.zeros(shape=(240,320,3))
-    for l in lines:
-        cv2.line(overlay,l[0],l[1],(0,0,255),1)
-    
-    # selecting the size of the Region of Intrest (ROI)
-    ROI=(140,171) 
-    
-    #setting the offset where region of intrest was extracted
-    offset=(85,68)
+def inverse_prespective(lines,ROI, offset):
+    """"
+    applies inverse prespective distortion on lines that are detected
+    ROI : size of the Region of Intrest (ROI). e.g.  (140,171)
+    offset :  where region of intrest should be extracted . e.g.(68,85)
+    """"
     
     #setting the area where the transformation was applied
     src_cordinates=[[offset[0], offset[1]],[offset[0]+ROI[0], offset[1]], [0, offset[1]+ROI[1]], [image.shape[0]-1, offset[1]+ROI[1]]]
