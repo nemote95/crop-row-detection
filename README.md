@@ -1,5 +1,5 @@
 # crop-row-detection
-This project detect crop rows for different types of plants and in different fields by taking th following steps:
+The aim of this project is to detect crop rows for different types of plants and in different fields by taking th following steps:
   1.  Converting to HSV color space
   2.  Applying a threshold for green parts
   3.  Selecting region of interest
