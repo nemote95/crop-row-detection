@@ -62,6 +62,8 @@ def inverse_prespective(lines,ROI, offset):
     ROI : size of the Region of Intrest (ROI). e.g.  (140,171)
     offset :  where region of intrest should be extracted . e.g.(68,85)
     '''
+    # creating an overlay for displaying lines on the image in bird_eye view. 
+    overlay = np.zeros(shape=(240,320,3))
     
     #setting the area where the transformation was applied
     src_cordinates=[[offset[0], offset[1]],[offset[0]+ROI[0], offset[1]], [0, offset[1]+ROI[1]], [image.shape[0]-1, offset[1]+ROI[1]]]
